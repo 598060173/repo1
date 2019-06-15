@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/tx
+http://www.springframework.org/schema/tx/spring-tx.xsd
+http://www.springframework.org/schema/aop
+http://www.springframework.org/schema/aop/spring-aop.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--组件扫描 扫描service和mapper-->
+    <!--排除controller的扫描-->
+    <context:component-scan base-package="com.itheima.ssm.dao">
+    </context:component-scan>
+
+    <!--加载propeties文件-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+
+    <!--配置数据源信息-->
+
+    <bean id="datasource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${jdbc.driver}"></property>
+        <property name="url" value="${jdbc.url}"></property>
+        <property name="username" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+    </bean>
+    <!--配置Mybits的sessionFactory  主要用于service层 spring_mybits的整合-->
+    <bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="datasource"></property>
+        <!--定义page插件-->
+        <property name="plugins">
+            <array>
+                <bean class="com.github.pagehelper.PageInterceptor">
+                    <property name="properties">
+                       <props>
+                           <!--表示用的是什么类型的数据库-->
+                           <prop key="helperDialect">mysql</prop>
+                           <!--表示如果是首页或尾页,不跳转-->
+                           <prop key="reasonable">true</prop>
+                       </props>
+                    </property>
+                </bean>
+            </array>
+        </property>
+        <!--定义别名 domain包下的所有pojo类,别名默认为类名.大小写均可-->
+        <property name="typeAliasesPackage" value="com.itheima.ssm.domain"/>
+    </bean>
+
+    <!--扫描mapper所在的包 为mapper创建实现类-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.itheima.ssm.dao"></property>
+    </bean>
+
+</beans>
